@@ -1,6 +1,8 @@
 # Change Request Tracker Automation (n8n)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+![n8n](https://img.shields.io/badge/Built%20With-n8n-orange.svg)
 
-[MIT License](LICENSE) • Built with n8n • PMO-style workflow automation
+
 This project is an end-to-end Change Request approval workflow built using **n8n**, **Google Forms**, **Google Sheets**, and **Gmail**.
 
 It automates the intake, tracking, approval, and notification of change requests in a PMO-style process.
