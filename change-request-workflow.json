@@ -1,0 +1,638 @@
+{
+  "name": "CR – Change Request Intake",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us",
+          "mode": "list",
+          "cachedResultName": "Change Request Form",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1994104872,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us/edit#gid=1994104872"
+        },
+        "event": "=rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -144
+      ],
+      "id": "acc221aa-e12f-4fb3-bdfd-b1fd9ea121d0",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "WsibzRWvWBHGcdf2",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3f686ffb-843b-4400-a54b-5c1b2bc5ee9b",
+              "name": "Request ID",
+              "value": "=CR-{{$now.toFormat('yyyyLLdd-HHmmss')}}-{{$json.rowNumber || $execution.id}}",
+              "type": "string"
+            },
+            {
+              "id": "c1dd2833-ccbe-432e-84a8-d9a9cb98fdba",
+              "name": "request_status",
+              "value": "Pending Approval",
+              "type": "string"
+            },
+            {
+              "id": "d49087ff-0fa6-4e7e-9443-b721190535ae",
+              "name": "logged_date",
+              "value": "={{$now.setZone('Asia/Kolkata').toFormat('dd-LLL-yyyy HH:mm')}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -80,
+        -144
+      ],
+      "id": "ad5322f4-bbdf-46e9-981f-ccebabd0b7ed",
+      "name": "Set – Init Change Request"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "aayush2k@gmail.com",
+        "subject": "=Approval Required: Change Request {{ $json['Request ID'] }}",
+        "message": "=A new Change Request has been submitted.\n\nRequest ID: {{ $json['Request ID'] }}\nProject Name: {{ $json['Project Name '] }}\nRequested By: {{ $json['Requested By '] }}\nChange Type: {{ $json['Change Type '] }}\nPriority: {{ $json['Priority '] }}\n\nPlease approve or reject this change request.\n",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        128,
+        -144
+      ],
+      "id": "51c00e08-8d36-4ee8-bc51-cd21c4a1a7a7",
+      "name": "Send message and wait for response",
+      "webhookId": "6fa06014-0bee-4bfc-bc83-9acb27c041f3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Uujve9jYCdHhriDM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us",
+          "mode": "list",
+          "cachedResultName": "Change Request Form",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1994104872,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us/edit#gid=1994104872"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $('Google Sheets Trigger').item.json.Timestamp }}",
+            "Request ID": "={{ $('Set – Init Change Request').item.json['Request ID'] }}",
+            "Status": "Approved",
+            "Logged Date": "={{ $('Set – Init Change Request').item.json.logged_date }}"
+          },
+          "matchingColumns": [
+            "Timestamp"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Id",
+              "displayName": "Email Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Project Name ",
+              "displayName": "Project Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Requested By ",
+              "displayName": "Requested By ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Change Description ",
+              "displayName": "Change Description ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Change Type ",
+              "displayName": "Change Type ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Priority ",
+              "displayName": "Priority ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Impact Assessment ",
+              "displayName": "Impact Assessment ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Requested Date ",
+              "displayName": "Requested Date ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Request ID",
+              "displayName": "Request ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Logged Date",
+              "displayName": "Logged Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        -272
+      ],
+      "id": "c3d69a85-c1cb-48ec-89fa-23043ba6c01e",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "o21Pq2v2BBSpR9XY",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['Email Id'] }}",
+        "subject": "=Change Request {{ $('Set – Init Change Request').item.json['Request ID'] }}– Approved",
+        "message": "=Hello,  Your change request has been APPROVED.  Request ID: {{ $('Set – Init Change Request').item.json['Request ID'] }} Project Name: {{ $('Set – Init Change Request').item.json['Project Name '] }} Change Type: {{ $('Set – Init Change Request').item.json['Change Type '] }} Priority:  {{ $('Set – Init Change Request').item.json['Priority '] }} Approved On: {{$now.setZone('Asia/Kolkata').toFormat('dd-LLL-yyyy HH:mm')}}  Regards, PMO Team",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        -240
+      ],
+      "id": "aa2c3b5c-3b73-40d1-92d1-9cf496811dc4",
+      "name": "Send a message",
+      "webhookId": "75fabeb4-315a-47be-80c8-c20d8f2e8d87",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Uujve9jYCdHhriDM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1ee4c2f4-f991-4ef3-abad-e3d6dfe46e29",
+              "leftValue": "={{$json.data.approved}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        -144
+      ],
+      "id": "d60f0e77-dc80-4792-ab80-a32148e65119",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us",
+          "mode": "list",
+          "cachedResultName": "Change Request Form",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1994104872,
+          "mode": "list",
+          "cachedResultName": "Form Responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SWTMhf6JBp98JG2Ncxx412bVSJ8LM_FJ6lYxVlh28us/edit#gid=1994104872"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $('Google Sheets Trigger').item.json.Timestamp }}",
+            "Request ID": "={{ $('Set – Init Change Request').item.json['Request ID'] }}",
+            "Status": "Rejected",
+            "Logged Date": "={{ $('Set – Init Change Request').item.json.logged_date }}"
+          },
+          "matchingColumns": [
+            "Timestamp"
+          ],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Id",
+              "displayName": "Email Id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Project Name ",
+              "displayName": "Project Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Requested By ",
+              "displayName": "Requested By ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Change Description ",
+              "displayName": "Change Description ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Change Type ",
+              "displayName": "Change Type ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Priority ",
+              "displayName": "Priority ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Impact Assessment ",
+              "displayName": "Impact Assessment ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Requested Date ",
+              "displayName": "Requested Date ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Request ID",
+              "displayName": "Request ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Logged Date",
+              "displayName": "Logged Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        0
+      ],
+      "id": "f4ea0329-cc5d-46f0-a13e-bc4e81f24928",
+      "name": "Update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "o21Pq2v2BBSpR9XY",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json['Email Id'] }}",
+        "subject": "=Change Request {{ $('Set – Init Change Request').item.json['Request ID'] }}– Rejected",
+        "message": "=Hello,\n\nYour change request has been REJECTED.\n\nRequest ID: {{ $('Set – Init Change Request').item.json['Request ID'] }}\nProject Name: {{ $('Set – Init Change Request').item.json['Project Name '] }}\nChange Type: {{ $('Set – Init Change Request').item.json['Change Type '] }}\nPriority: {{ $('Set – Init Change Request').item.json['Priority '] }}\nDecision Date: {{$now.setZone('Asia/Kolkata').toFormat('dd-LLL-yyyy HH:mm')}}\n\nFor further clarification, please contact the PMO team.\n\nRegards,\nPMO Team\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        -32
+      ],
+      "id": "73b13f6c-47da-409a-b073-7ca8f6171159",
+      "name": "Send a message1",
+      "webhookId": "75fabeb4-315a-47be-80c8-c20d8f2e8d87",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Uujve9jYCdHhriDM",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set – Init Change Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set – Init Change Request": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Kolkata",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "484d21ab-bded-4696-b000-c6defa02d02b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "416359e4a7749cc7da97ace1a441eaebf018c073fd2322930b6972dba927355b"
+  },
+  "id": "xYhoxRZKvLkQ_zqMWD22J",
+  "tags": []
+}
